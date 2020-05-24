@@ -1,0 +1,228 @@
+
+
+-- ---------------------------------------------------------
+-- creating an auto-increment field with the sequence object
+-- ---------------------------------------------------------
+
+-- for table users
+CREATE SEQUENCE auto_id
+    START WITH 1
+    INCREMENT BY 1
+    NOMAXVALUE;
+
+-- for table post
+	
+CREATE SEQUENCE auto_post_id
+   START WITH 1
+    INCREMENT BY 1
+    NOMAXVALUE;
+	
+-- for table files
+	
+CREATE SEQUENCE auto_file_id
+    START WITH 1
+    INCREMENT BY 1
+    NOMAXVALUE;
+	
+-- for table comment
+
+CREATE SEQUENCE auto_comment_id
+   START WITH 1
+    INCREMENT BY 1
+    NOMAXVALUE;
+	
+-- for table message
+
+CREATE SEQUENCE auto_message_id
+  START WITH 1
+    INCREMENT BY 1
+    NOMAXVALUE;
+	
+
+--------------------------------------
+--creating tables
+--------------------------------------
+
+
+CREATE TABLE users (
+    id int NOT NULL,
+    username varchar(45) NOT NULL,
+    password varchar(45) NOT NULL,
+    PRIMARY KEY (id)
+	);
+
+CREATE TABLE personal_data (
+    
+    name VARCHAR(45) NOT NULL,
+    email VARCHAR(45) NOT NULL,
+	phone VARCHAR(11) NOT NULL,
+	user_id INT NOT NULL,
+	
+	FOREIGN KEY (user_id) REFERENCES users(id)
+   
+);
+CREATE INDEX index_user
+ON personal_data (user_id);
+
+CREATE TABLE post (
+    id int NOT NULL,
+	user_id INT NOT NULL,
+	PRIMARY KEY (id),
+	FOREIGN KEY (user_id) REFERENCES users(id)
+    
+);
+
+CREATE INDEX index_user_post
+ON post (user_id);
+
+
+CREATE TABLE comments (
+    id INT NOT NULL,
+	user_id INT NOT NULL,
+    post_id INT NOT NULL,
+    text VARCHAR(145) NOT NULL,
+	PRIMARY KEY (id),
+	FOREIGN KEY (user_id) REFERENCES users(id),
+	FOREIGN KEY (post_id) REFERENCES post(id)
+    
+);
+
+
+CREATE INDEX index_user_com
+ON comments(user_id);
+
+CREATE INDEX index_post_com
+ON comments(post_id);
+
+CREATE TABLE files (
+    id INT NOT NULL ,
+    size_of_file INT NOT NULL,
+	type VARCHAR(45) ,
+    post_id INT NOT NULL,
+	PRIMARY KEY (id),
+	FOREIGN KEY (post_id) REFERENCES post(id)
+    
+);
+
+CREATE INDEX index_post_f
+ON files(post_id);
+
+CREATE TABLE dialog (
+    id INT NOT NULL,
+
+	PRIMARY KEY (id) 
+);
+
+
+CREATE TABLE message (
+    id INT NOT NULL,
+	text VARCHAR(145) NOT NULL,
+	user_id INT NOT NULL,
+	PRIMARY KEY (id),
+	FOREIGN KEY (user_id) REFERENCES users(id)
+
+);
+
+CREATE INDEX index_user_mess
+ON message(user_id);
+
+CREATE TABLE dialog_user (
+    dialog_id INT NOT NULL ,
+	user_id INT NOT NULL,
+	PRIMARY KEY (dialog_id, user_id  ),
+	FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (dialog_id) REFERENCES dialog(id)
+	
+);
+
+CREATE INDEX index_user_d
+ON dialog_user(user_id);
+CREATE INDEX index_dialog_d
+ON dialog_user(dialog_id);
+
+CREATE TABLE dialog_message (
+    dialog_id INT NOT NULL ,
+	message_id INT NOT NULL,
+	PRIMARY KEY (dialog_id, message_id  ),
+	FOREIGN KEY (message_id) REFERENCES message(id),
+	FOREIGN KEY (dialog_id) REFERENCES dialog(id)
+	
+    
+);
+
+
+CREATE INDEX index_message_d
+ON dialog_message(message_id );
+
+CREATE INDEX index_post_dialog_d
+ON dialog_message(dialog_id);
+
+CREATE TABLE followers (
+    user_id INT NOT NULL ,
+	user1_id INT NOT NULL,
+	PRIMARY KEY (user_id, user1_id  ),
+	FOREIGN KEY (user_id) REFERENCES users(id),
+	FOREIGN KEY (user1_id) REFERENCES users(id)
+	
+    
+);
+
+CREATE INDEX index_user_f
+ON followers(user_id );
+CREATE INDEX index_user1_f
+ON followers(user1_id);
+
+
+
+	
+------------------------------------------------------
+--creating Triggers for each table for autoincrement
+------------------------------------------------------
+
+-- for table users
+	
+	CREATE OR REPLACE TRIGGER tr_auto_id before INSERT ON users FOR each row
+BEGIN
+  SELECT auto_id.NEXTVAL
+  INTO :new.id
+  FROM dual;
+END;
+
+-- for table post
+
+	CREATE OR REPLACE TRIGGER tr_post_id before INSERT ON post FOR each row
+BEGIN
+  SELECT auto_post_id.NEXTVAL
+  INTO :new.id
+  FROM dual;
+END;
+
+-- for table files
+
+
+	CREATE OR REPLACE TRIGGER tr_file_id before INSERT ON files FOR each row
+BEGIN
+  SELECT auto_file_id.NEXTVAL
+  INTO :new.id
+  FROM dual;
+END;
+
+-- for table comment
+
+
+	CREATE OR REPLACE TRIGGER tr_comment_id before INSERT ON comments FOR each row
+BEGIN
+  SELECT auto_comment_id.NEXTVAL
+  INTO :new.id
+  FROM dual;
+END;
+
+-- for table message
+
+
+	CREATE OR REPLACE TRIGGER tr_message_id before INSERT ON message FOR each row
+BEGIN
+  SELECT auto_message_id.NEXTVAL
+  INTO :new.id
+  FROM dual;
+END;
